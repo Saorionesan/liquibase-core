@@ -1,0 +1,9 @@
+${osLevelConfig}
+
+user { 'liquibase':
+    password => 'liquibase'
+}
+
+#foreach ( $block in $puppetBlocks )
+${block}
+#end
