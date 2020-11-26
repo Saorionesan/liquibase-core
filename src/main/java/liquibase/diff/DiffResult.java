@@ -151,7 +151,7 @@ public class DiffResult {
     }
 
     public <T extends DatabaseObject> SortedMap<T, ObjectDifferences> getChangedObjects(Class<T> type, Comparator<DatabaseObject> comparator) {
-        SortedMap<T, ObjectDifferences> map = new TreeMap<>(comparator);
+        SortedMap<T, ObjectDifferences> map = new TreeMap<>(comparator); // 将用来对此映射进行排序的比较器
         map.putAll(getChangedObjects(type));
         return map;
     }

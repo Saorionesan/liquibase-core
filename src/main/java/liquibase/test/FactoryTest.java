@@ -4,10 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.change.ChangeWithColumns;
 import liquibase.change.ColumnConfig;
-import liquibase.change.core.CreateIndexChange;
-import liquibase.change.core.CreateProcedureChange;
-import liquibase.change.core.CreateTableChange;
-import liquibase.change.core.CreateViewChange;
+import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
@@ -127,23 +124,23 @@ public class FactoryTest {
     targetSnapshot.setSchemaComparisons(control.getSchemaComparisons());
     System.out.println("目标快照:"+targetSnapshot.getDatabase());
     // 第一个参数为目标要比较的模式，第二个参数为源模式
+        FileOutputStream fileOutputStream=new FileOutputStream("C:\\Users\\saorionesan\\Desktop\\liquibase-test.txt");
     final List<ChangeSet> changesets = performDiff(control, targetSnapshot, sourceSnapshot); // 比较控制器 源快照、目标快照
-        StringWriter writer=new StringWriter();
         for (ChangeSet changeSet:changesets){
         List<Change> list=changeSet.getChanges();
         for (Change change:list){
-            if(change instanceof CreateProcedureChange){
-                System.out.println("test");
-            }
+            StringWriter writer=new StringWriter(); //注意该writer每输入一段数据后不会自动清空，类似于StringBuffer 那样。建议新建对象来输出
             try {
                 targetDatabase.saveStatements(change, null, writer);
-                System.out.print(writer.toString());
+                System.out.println(writer.toString());
+                //fileOutputStream.write(writer.toString().getBytes());
+                writer.flush();
+                writer.close();
             }
             catch (Exception e) {
             }
         }
     }
-   writer.flush();
     }
 
     private static Connection getConnection(String driver,String url,String userName,String pass) throws Exception {

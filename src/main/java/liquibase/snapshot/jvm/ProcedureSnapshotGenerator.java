@@ -58,9 +58,9 @@ public class ProcedureSnapshotGenerator extends JdbcSnapshotGenerator {
                             storedProcedure.setBody(resultSet.getString("Create Function"));
                         }
                     } else if (database instanceof OracleDatabase) {
-                        storedProcedure.setBody("CREATE OR REPLACE " + getProcSQL(resultSet));
+                        storedProcedure.setBody("CREATE OR REPLACE " + getSQL(resultSet));
                     } else {
-                        storedProcedure.setBody(getProcSQL(resultSet));
+                        storedProcedure.setBody(getSQL(resultSet));
                     }
                     return storedProcedure;
                 }
@@ -153,16 +153,6 @@ public class ProcedureSnapshotGenerator extends JdbcSnapshotGenerator {
         }
     }
 
-    private String getProcSQL(ResultSet resultSet) throws SQLException { // 从resultset中获取SQL
-        StringBuilder source = null;
-        while (resultSet.next()) {
-            final String line = resultSet.getString(1);
-            if (source == null) {
-                source = new StringBuilder(200);
-            }
-            source.append(line);
-        }
-        return source.toString();
-    }
+
 
 }

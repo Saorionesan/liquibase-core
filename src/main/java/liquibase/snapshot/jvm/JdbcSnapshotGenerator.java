@@ -177,5 +177,17 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         }
         return returnList.toArray(new String[returnList.size()]);
     }
+
+    public String getSQL(ResultSet resultSet) throws SQLException { // 从resultset中获取SQL
+        StringBuilder source = null;
+        while (resultSet.next()) {
+            final String line = resultSet.getString(1);
+            if (source == null) {
+                source = new StringBuilder(200);
+            }
+            source.append(line);
+        }
+        return source.toString();
+    }
     
 }

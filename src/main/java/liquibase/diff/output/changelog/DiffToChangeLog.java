@@ -25,6 +25,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredProcedure;
+import liquibase.structure.core.Trigger;
 import liquibase.structure.core.View;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StringUtils;
@@ -165,7 +166,7 @@ public class DiffToChangeLog {
         List<ChangeSet> updateChangeSets = new ArrayList<ChangeSet>();
 
         /**
-         * 此处先比较output 包中的修改了的类
+         * 此处先比较output 包中的change模块下的类
          */
         for (Class<? extends DatabaseObject> type : types) {
             ObjectQuotingStrategy quotingStrategy = diffOutputControl.getObjectQuotingStrategy();
@@ -207,13 +208,9 @@ public class DiffToChangeLog {
         }
 
         List<ChangeSet> createChangeSets = new ArrayList<ChangeSet>();
-
         for (DatabaseObject object : sortMissingObjects(missingObjects, diffResult.getReferenceSnapshot().getDatabase())) {
             ObjectQuotingStrategy quotingStrategy = diffOutputControl.getObjectQuotingStrategy();
-            if(object instanceof View){
-                System.out.println(object.getName());
-            }
-            if(object instanceof StoredProcedure){
+            if(object instanceof Trigger){
                 System.out.println(object.toString());
             }
             Change[] changes = changeGeneratorFactory.fixMissing(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase()); //根据对应的ChangeGenerator 生成changeSet

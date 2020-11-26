@@ -67,7 +67,7 @@ public class StandardDiffGenerator implements DiffGenerator {
 
     protected <T extends DatabaseObject> void compareObjectType(Class<T> type, DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffResult diffResult) {
         if("public class liquibase.structure.core.StoredProcedure".equals(type.toGenericString())){
-            System.out.println("进入获取存储过程："+type.toGenericString());
+            System.out.println("进入获取触发器："+type.toGenericString());
         }
         Database comparisonDatabase = comparisonSnapshot.getDatabase();
         Database referenceDatabase = referenceSnapshot.getDatabase();
@@ -88,11 +88,11 @@ public class StandardDiffGenerator implements DiffGenerator {
                     }
                     T comparisonObject = comparisonSnapshot.get(referenceObject);
                     if (comparisonObject == null) {
-                        diffResult.addMissingObject(referenceObject);
+                        diffResult.addMissingObject(referenceObject);//存放目标库中缺失的实例
                     } else {
                         ObjectDifferences differences = DatabaseObjectComparatorFactory.getInstance().findDifferences(referenceObject, comparisonObject, comparisonDatabase, diffResult.getCompareControl());
                         if (differences.hasDifferences()) {
-                            diffResult.addChangedObject(referenceObject, differences);
+                            diffResult.addChangedObject(referenceObject, differences); //存放目标库中修改的实例
                         }
                     }
                 }
@@ -114,7 +114,7 @@ public class StandardDiffGenerator implements DiffGenerator {
                     }
 
                     if (referenceSnapshot.get(comparisonObject) == null) {
-                        diffResult.addUnexpectedObject(comparisonObject);
+                        diffResult.addUnexpectedObject(comparisonObject);  //存放目标库需要删除的对象
                     }
                     //            }
                 }

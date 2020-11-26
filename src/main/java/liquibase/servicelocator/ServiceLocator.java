@@ -217,6 +217,17 @@ public class ServiceLocator {
         }
     }
 
+    /**
+     * 此处通过反射获取各个接口的实现类
+     *
+     *比如 liquibase.structure.DatabaseObject 接口等等
+     *
+     * 注意在实现对应接口的时候要在实现类中保留一个无参构造器，其会通过clazz.getConstructor(); 来获取无参构造器
+     * 获取失败将不会添加该类型
+     * @param requiredInterface 需要获取实现类的接口
+     * @return
+     * @throws Exception
+     */
     private List<Class> findClassesImpl(Class requiredInterface) throws Exception {
         LogService.getLog(getClass()).debug(LogType.LOG, "ServiceLocator finding classes matching interface " + requiredInterface.getName());
 
@@ -231,7 +242,7 @@ public class ServiceLocator {
 
             if (!Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers()) && !clazz.isAnonymousClass() &&!clazz.isSynthetic() && Modifier.isPublic(clazz.getModifiers())) {
                 try {
-                    clazz.getConstructor();
+                    clazz.getConstructor(); //获取该class对象的无参构造器，
                     LogService.getLog(getClass()).debug(LogType.LOG, clazz.getName() + " matches "+requiredInterface.getName());
 
                     classes.add(clazz);

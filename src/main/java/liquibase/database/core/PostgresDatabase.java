@@ -104,7 +104,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        System.out.println("获取到的数据库名称为:"+conn.getDatabaseProductName());
         if (!PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName())) {
             return false;
         }

@@ -18,7 +18,7 @@ public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends
     }
 
     @Override
-    public T setName(String name) {
+    public T setName(String name) { //设置存储过程名称
         setAttribute("name", name);
         return (T) this;
     }
@@ -28,7 +28,7 @@ public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends
         return getAttribute("schema", Schema.class);
     }
 
-    public T setSchema(Schema schema) {
+    public T setSchema(Schema schema) {   //设置存储过程所属的schema
         setAttribute("schema", schema);
         return (T) this;
     }
