@@ -1,9 +1,7 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -14,6 +12,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.StoredProcedure;
+import oracle.jdbc.proxy.annotation.Post;
 
 
 import java.sql.Connection;
@@ -100,6 +99,9 @@ public class ProcedureSnapshotGenerator extends JdbcSnapshotGenerator {
         if (database instanceof MySQLDatabase) {
             storedProcedure.setAttribute("PROCEDURE_TYPE", procedure.get("PROCEDURE_TYPE"));
         }
+        if(database instanceof PostgresDatabase){
+            storedProcedure.setAttribute("pid", procedure.get("pid"));
+        }
         return storedProcedure;
     }
 
@@ -118,7 +120,7 @@ public class ProcedureSnapshotGenerator extends JdbcSnapshotGenerator {
                     "\t'FUNCTION')\n" +
                     "ORDER BY\n" +
                     "\tROUTINE_NAME";
-        } else if (database instanceof OracleDatabase) {
+        } else if (database instanceof OracleDatabase || database instanceof DMDatabase) {
             return "SELECT\n" +
                     "    OBJECT_NAME AS PROCEDURE_NAME,\n" +
                     "\tOWNER AS SCHEMA_NAME\n" +
@@ -135,7 +137,25 @@ public class ProcedureSnapshotGenerator extends JdbcSnapshotGenerator {
                     "LEFT OUTER JOIN " + schema.getCatalogName() + ".sys.extended_properties ep ON ep.class=1 AND ep.major_id=p.object_id AND ep.minor_id=0 AND ep.name='MS_Description'\n" +
                     "WHERE p.type IN ('P','PC','X','TF','FN','IF') AND p.schema_id=1\n" +
                     "ORDER BY p.name";
-        } else {
+        } else if(database instanceof PostgresDatabase){
+           return "select p.oid as pid,p.proname as procedure_name\n" +
+                   "from pg_catalog.pg_proc p ,pg_catalog.pg_namespace d\n" +
+                   "where p.pronamespace=d.oid and d.nspname ='"+schema.getName()+"'\n" +
+                   "order by p.proname";
+        }  else if(database instanceof KingBaseDatabase){
+            return  "SELECT\n" +
+                    "\tROUTINE_NAME AS PROCEDURE_NAME,\n" +
+                    "\tROUTINE_TYPE AS PROCEDURE_TYPE,\n" +
+                    "\tROUTINE_SCHEMA AS SCHEMA_NAME\n" +
+                    "FROM\n" +
+                    "\tINFORMATION_SCHEMA.ROUTINES\n" +
+                    "WHERE\n" +
+                    "\tROUTINE_SCHEMA = '" +schema.getName()+"'\n"+
+                    "\tAND ROUTINE_TYPE IN ('PROCEDURE','FUNCTION')\n" +
+                    "\tAND ROUTINE_CATALOG ='" +schema.getCatalogName()+"'\n"+
+                    "ORDER BY\n" +
+                    "\tROUTINE_NAME";
+        }else {
             throw new UnexpectedLiquibaseException("Don't know how to query for procedure on " + database);
         }
     }
@@ -144,15 +164,15 @@ public class ProcedureSnapshotGenerator extends JdbcSnapshotGenerator {
         if (database instanceof MySQLDatabase) {
             String type = storedProcedure.getAttribute("PROCEDURE_TYPE", String.class).toUpperCase();
             return "SHOW CREATE " + type + " " + schema.getName() + ".`" + storedProcedure.getName() + "`";
-        } else if (database instanceof OracleDatabase) {
+        } else if (database instanceof OracleDatabase || database instanceof DMDatabase) {
             return "SELECT TEXT FROM DBA_SOURCE WHERE  OWNER='" + schema.getName() + "' AND NAME='" + storedProcedure.getName() + "' ORDER BY LINE";
         } else if (database instanceof MSSQLDatabase) {
             return schema.getCatalogName() + ".sys.sp_helptext 'dbo." + storedProcedure.getName() + "'";
-        } else {
+        }else if(database instanceof PostgresDatabase){
+            return "SELECT pg_get_functiondef("+storedProcedure.getAttribute("pid",Integer.class)+")";
+        }else {
             throw new UnexpectedLiquibaseException("Don't know how to query for procedure on " + database);
         }
     }
-
-
 
 }

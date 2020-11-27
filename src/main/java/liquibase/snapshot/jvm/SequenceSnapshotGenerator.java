@@ -228,11 +228,16 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 //            );
         }else if(database instanceof KingBaseDatabase){
             return "SELECT\n" +
-                    "\tSEQUENCE_NAME AS SEQUENCE_NAME\n" +
+                    "\tSEQUENCE_NAME AS SEQUENCE_NAME,\n" +
+                    "\tSTART_VALUE AS START_VALUE,\n" +
+                    "\tMINIMUM_VALUE AS MIN_VALUE,\n" +
+                    "\tMAXIMUM_VALUE AS MAX_VALUE,\n" +
+                    "\tINCREMENT AS INCREMENT_BY,\n" +
+                    "\tCYCLE_OPTION AS WILL_CYCLE\n" +
                     "FROM\n" +
                     "\tINFORMATION_SCHEMA.SEQUENCES\n" +
                     "WHERE\n" +
-                    "\tSEQUENCE_SCHEMA = '"+schema.getName()+"'\n" +
+                    "\tSEQUENCE_SCHEMA = '" +schema.getName()+"'\n"+
                     "\tAND SEQUENCE_CATALOG = '"+schema.getCatalogName()+"'";
         } else if (database instanceof MSSQLDatabase) {
             return  "SELECT SEQUENCE_NAME, " +
